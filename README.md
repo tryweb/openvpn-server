@@ -1,7 +1,64 @@
-# d3vilh/openvpn-server
-Fast Docker container with OpenVPN Server living inside.
+# tryweb/openvpn-server
 
-[![latest version](https://img.shields.io/github/v/release/d3vilh/openvpn-server?color=%2344cc11&label=LATEST%20RELEASE&style=flat-square&logo=Github)](https://github.com/d3vilh/openvpn-server/releases/latest)  [![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/d3vilh/openvpn-server/latest?style=flat-square&logo=docker&logoColor=white&label=DOCKER%20IMAGE&color=2344cc11)](https://hub.docker.com/r/d3vilh/openvpn-server) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/d3vilh/openvpn-server/latest?logo=Docker&color=2344cc11&label=IMAGE%20SIZE&style=flat-square&logoColor=white)
+Forked from [d3vilh/openvpn-server](https://github.com/d3vilh/openvpn-server) - Fast Docker container with OpenVPN Server living inside.
+
+[![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/tryweb/openvpn-server/latest?style=flat-square&logo=docker&logoColor=white&label=DOCKER%20IMAGE&color=%2344cc11)](https://github.com/users/tryweb/packages/container/openvpn-server) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tryweb/openvpn-server/latest?logo=Docker&color=%2344cc11&label=IMAGE%20SIZE&style=flat-square&logoColor=white)
+
+## Quick Start
+
+### Using GitHub Container Registry (Recommended)
+
+```bash
+docker pull ghcr.io/tryweb/openvpn-server:latest
+docker run -d --name openvpn \
+  --cap-add NET_ADMIN \
+  -p 1194:1194/udp \
+  -e TRUST_SUB=10.0.70.0/24 \
+  -e GUEST_SUB=10.0.71.0/24 \
+  -e HOME_SUB=192.168.88.0/24 \
+  -v ./pki:/etc/openvpn/pki \
+  -v ./clients:/etc/openvpn/clients \
+  -v ./config:/etc/openvpn/config \
+  -v ./staticclients:/etc/openvpn/staticclients \
+  -v ./log:/var/log/openvpn \
+  -v ./server.conf:/etc/openvpn/server.conf \
+  -v ./fw-rules.sh:/opt/app/fw-rules.sh \
+  --privileged ghcr.io/tryweb/openvpn-server:latest
+```
+
+### Build from Source
+
+```bash
+git clone https://github.com/tryweb/openvpn-server
+cd openvpn-server
+docker compose up -d
+```
+
+## CI/CD
+
+This fork includes automated CI/CD workflows:
+
+- **Build and Push**: Automatically builds and pushes to GHCR on `release` branch pushes
+- **Sync Upstream**: Automatically syncs with upstream `d3vilh/openvpn-server` every Monday
+
+### Syncing Upstream Updates
+
+```bash
+# Sync main branch with upstream
+git fetch upstream
+git checkout main
+git merge upstream/main --ff-only
+git push origin main
+
+# Merge into release branch
+git checkout release
+git merge main
+git push origin release
+```
+
+## Upstream
+
+This is a fork of [d3vilh/openvpn-server](https://github.com/d3vilh/openvpn-server). PRs for upstream features should be submitted to the original repository.
 
 [![latest version](https://img.shields.io/github/v/release/d3vilh/openvpn-ui?color=%2344cc11&label=OpenVPN%20UI&style=flat-square&logo=Github)](https://github.com/d3vilh/openvpn-ui) [![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/d3vilh/openvpn-ui/latest?logo=docker&label=OpenVPN%20UI%20IMAGE&color=2344cc11&style=flat-square&logoColor=white)](https://hub.docker.com/r/d3vilh/openvpn-ui) 
 
@@ -33,6 +90,8 @@ cd openvpn-server
 docker compose up -d
 ```
 3. That's it. It seems you have your own openvpn-server running on your machine.
+
+> **Note**: This fork uses `ghcr.io/tryweb/openvpn-server:latest`. To build locally instead, edit `docker-compose.yml` and uncomment `build: .`.
 
 For easy **OpenVPN Server** management install [**OpenVPN-UI**](https://github.com/d3vilh/openvpn-ui).
 
@@ -143,7 +202,7 @@ You can update all these parameters later with OpenVPN UI on `Configuration > Ea
 
 ### Run with Docker:
 ```shell
-docker run  --interactive --tty --rm \
+docker run  --interactive --ty --rm \
   --name=openvpn \
   --cap-add=NET_ADMIN \
   -p 1194:1194/udp \
@@ -157,7 +216,7 @@ docker run  --interactive --tty --rm \
   -v ./log:/var/log/openvpn \
   -v ./fw-rules.sh:/opt/app/fw-rules.sh \
   -v ./server.conf:/etc/openvpn/server.conf \
-  --privileged d3vilh/openvpn-server:latest
+  --privileged ghcr.io/tryweb/openvpn-server:latest
 ```
 
 ### Run the OpenVPN-UI image
@@ -172,15 +231,15 @@ docker run \
 --privileged d3vilh/openvpn-ui:latest
 ```
 
-### Build image form scratch:
+### Build image from scratch:
 1. Clone the repo:
 ```shell
-git clone https://github.com/d3vilh/openvpn-server
+git clone https://github.com/tryweb/openvpn-server
 ```
 2. Build the image:
 ```shell
 cd openvpn-server
-docker build --force-rm=true -t d3vilh/openvpn-server .
+docker build --force-rm=true -t ghcr.io/tryweb/openvpn-server .
 ```
 
 ## Configuration
