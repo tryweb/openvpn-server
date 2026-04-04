@@ -2,7 +2,9 @@
 
 Forked from [d3vilh/openvpn-server](https://github.com/d3vilh/openvpn-server) - Fast Docker container with OpenVPN Server living inside.
 
-[![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/tryweb/openvpn-server/latest?style=flat-square&logo=docker&logoColor=white&label=DOCKER%20IMAGE&color=%2344cc11)](https://github.com/users/tryweb/packages/container/openvpn-server) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/tryweb/openvpn-server/latest?logo=Docker&color=%2344cc11&label=IMAGE%20SIZE&style=flat-square&logoColor=white)
+**Built with**: OpenVPN 2.6.16 + Easy-RSA 3.2.3 + Alpine 3.21
+
+[![Docker Image](https://img.shields.io/badge/image-ghcr.io%2Ftryweb%2FopenvpnServer-2.6.16-blue?logo=docker)](https://github.com/users/tryweb/packages/container/openvpn-server) ![Docker Image Size](https://img.shields.io/docker/image-size/tryweb/openvpn-server?logo=docker&color=%2344cc11&label=image%20size)
 
 ## Quick Start
 
