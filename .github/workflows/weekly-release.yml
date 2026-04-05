@@ -1,0 +1,154 @@
+name: Weekly Auto Release
+
+on:
+  schedule:
+    - cron: "0 2 * * 0"  # Every Sunday at 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force rebuild regardless of version changes'
+        required: false
+        default: 'false'
+
+jobs:
+  test-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: release
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get previous version info
+        id: prev_version
+        run: |
+          if [ -f test/versions.txt ]; then
+            echo "Previous versions:"
+            cat test/versions.txt
+            echo "PREV_ALPINE=$(grep '^Alpine:' test/versions.txt | awk '{print $2}')" >> $GITHUB_OUTPUT
+            echo "PREV_OPENVPN=$(grep '^OpenVPN:' test/versions.txt | awk '{print $2}')" >> $GITHUB_OUTPUT
+            echo "PREV_EASYRSA=$(grep '^Easy-RSA:' test/versions.txt | awk '{print $2}')" >> $GITHUB_OUTPUT
+            echo "PREV_OPENSSL=$(grep '^OpenSSL:' test/versions.txt | awk '{print $2}')" >> $GITHUB_OUTPUT
+          else
+            echo "No previous versions found"
+            echo "PREV_ALPINE=" >> $GITHUB_OUTPUT
+            echo "PREV_OPENVPN=" >> $GITHUB_OUTPUT
+            echo "PREV_EASYRSA=" >> $GITHUB_OUTPUT
+            echo "PREV_OPENSSL=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and test image
+        id: build_test
+        run: |
+          chmod +x test/build-verification.sh
+          
+          # Run test script with UPDATE_README=true to capture new versions
+          UPDATE_README=false ./test/build-verification.sh
+          
+          # Capture new versions
+          echo "New versions:"
+          cat test/versions.txt
+          echo "NEW_ALPINE=$(grep '^Alpine:' test/versions.txt | awk '{print $2}')" >> $GITHUB_OUTPUT
+          echo "NEW_OPENVPN=$(grep '^OpenVPN:' test/versions.txt | awk '{print $2}')" >> $GITHUB_OUTPUT
+          echo "NEW_EASYRSA=$(grep '^Easy-RSA:' test/versions.txt | awk '{print $2}')" >> $GITHUB_OUTPUT
+          echo "NEW_OPENSSL=$(grep '^OpenSSL:' test/versions.txt | awk '{print $2}')" >> $GITHUB_OUTPUT
+
+      - name: Check version changes
+        id: version_check
+        run: |
+          PREV_ALPINE="${{ steps.prev_version.outputs.PREV_ALPINE }}"
+          NEW_ALPINE="${{ steps.build_test.outputs.NEW_ALPINE }}"
+          PREV_OPENVPN="${{ steps.prev_version.outputs.PREV_OPENVPN }}"
+          NEW_OPENVPN="${{ steps.build_test.outputs.NEW_OPENVPN }}"
+          PREV_OPENSSL="${{ steps.prev_version.outputs.PREV_OPENSSL }}"
+          NEW_OPENSSL="${{ steps.build_test.outputs.NEW_OPENSSL }}"
+          FORCE="${{ github.event.inputs.force }}"
+          
+          echo "Previous: Alpine=$PREV_ALPINE OpenVPN=$PREV_OPENVPN OpenSSL=$PREV_OPENSSL"
+          echo "New:      Alpine=$NEW_ALPINE OpenVPN=$NEW_OPENVPN OpenSSL=$NEW_OPENSSL"
+          
+          if [ "$FORCE" = "true" ]; then
+            echo "VERSION_CHANGED=true" >> $GITHUB_OUTPUT
+            echo "Force rebuild enabled"
+          elif [ "$PREV_ALPINE" != "$NEW_ALPINE" ] || [ "$PREV_OPENVPN" != "$NEW_OPENVPN" ] || [ "$PREV_OPENSSL" != "$NEW_OPENSSL" ]; then
+            echo "VERSION_CHANGED=true" >> $GITHUB_OUTPUT
+            echo "Version changes detected - will release"
+          else
+            echo "VERSION_CHANGED=false" >> $GITHUB_OUTPUT
+            echo "No version changes - skipping release"
+          fi
+
+      - name: Update README if versions changed
+        if: steps.version_check.outputs.VERSION_CHANGED == 'true'
+        run: |
+          UPDATE_README=true ./test/build-verification.sh
+
+      - name: Commit and push version updates
+        if: steps.version_check.outputs.VERSION_CHANGED == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          git add test/versions.txt README.md
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          
+          git commit -m "chore: update versions $(cat test/versions.txt | grep -E '^[A-Z]' | tr '\n' ' ')"
+          git push
+
+      - name: Extract metadata
+        if: steps.version_check.outputs.VERSION_CHANGED == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            latest
+            ${{ github.sha }}
+
+      - name: Build and push to GHCR
+        if: steps.version_check.outputs.VERSION_CHANGED == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create GitHub Release
+        if: steps.version_check.outputs.VERSION_CHANGED == 'true'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.build_test.outputs.NEW_ALPINE }}-${{ steps.build_test.outputs.NEW_OPENVPN }}
+          release_name: Release v${{ steps.build_test.outputs.NEW_ALPINE }}-${{ steps.build_test.outputs.NEW_OPENVPN }}
+          draft: false
+          prerelease: false
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.version_check.outputs.VERSION_CHANGED }}" = "true" ]; then
+            echo "## Release Summary"
+            echo "- Alpine: ${{ steps.build_test.outputs.NEW_ALPINE }}"
+            echo "- OpenVPN: ${{ steps.build_test.outputs.NEW_OPENVPN }}"  
+            echo "- OpenSSL: ${{ steps.build_test.outputs.NEW_OPENSSL }}"
+            echo "- Image pushed to GHCR"
+          else
+            echo "No version changes detected. Skipping release."
+          fi
