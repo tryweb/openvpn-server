@@ -1,7 +1,7 @@
 # OpenVPN Server Version Report
-# Generated: 2026-04-12T04:50:02+00:00
+# Generated: 2026-04-19T04:53:26+00:00
 
-Alpine:    3.23.3
+Alpine:    3.23.4
 OpenVPN:    2.6.16
 Easy-RSA:   3.2.3
 OpenSSL:    3.5.6
