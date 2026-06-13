@@ -68,7 +68,7 @@ else
 fi
 
 echo "[PASS] Testing Easy-RSA PKI initialization..."
-docker exec "$CONTAINER_NAME" sh -c "cd /tmp && /usr/share/easy-rsa/easyrsa init-pki nopass" > /dev/null 2>&1 && \
+docker exec "$CONTAINER_NAME" sh -c "cd /tmp && /usr/share/easy-rsa/easyrsa init-pki" > /dev/null 2>&1 && \
     echo "[PASS] Easy-RSA can initialize PKI"
 
 echo ""
@@ -186,7 +186,7 @@ echo "[Step 11] Testing Easy-RSA PKI workflow..."
 echo "----------------------------------------"
 
 echo "[PASS] Testing PKI init..."
-docker exec "$CONTAINER_NAME" sh -c "EASYRSA_BATCH=1 /usr/share/easy-rsa/easyrsa init-pki nopass" > /dev/null 2>&1 && \
+docker exec "$CONTAINER_NAME" sh -c "EASYRSA_BATCH=1 /usr/share/easy-rsa/easyrsa init-pki" > /dev/null 2>&1 && \
     echo "[PASS] PKI initialized"
 
 echo "[PASS] Testing CA certificate generation..."
