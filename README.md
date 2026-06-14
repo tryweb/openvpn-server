@@ -5,7 +5,7 @@ Forked from [d3vilh/openvpn-server](https://github.com/d3vilh/openvpn-server) - 
 [![Docker Image](https://img.shields.io/badge/ghcr.io%2Ftryweb%2Fopenvpn--server-latest-blue?style=for-the-badge&logo=docker)](
 https://github.com/tryweb/openvpn-server/pkgs/container/openvpn-server)
 
-![Alpine Linux](https://img.shields.io/badge/Alpine-3.24.0-lightgray?style=for-the-badge&logo=alpine-linux&logoColor=white&labelColor=0D597F)
+![Alpine Linux](https://img.shields.io/badge/Alpine-3.24.1-lightgray?style=for-the-badge&logo=alpine-linux&logoColor=white&labelColor=0D597F)
 ![OpenVPN](https://img.shields.io/badge/OpenVPN-2.7.3-orange?style=for-the-badge&logo=openvpn&logoColor=white)
 ![OpenSSL](https://img.shields.io/badge/OpenSSL-3.5.7-blue?style=for-the-badge)
 ![Easy-RSA](https://img.shields.io/badge/Easy--RSA-3.2.5-blue?style=for-the-badge&logo=lock)
