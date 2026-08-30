@@ -7,7 +7,7 @@ https://github.com/tryweb/openvpn-server/pkgs/container/openvpn-server)
 
 ![Alpine Linux](https://img.shields.io/badge/Alpine-3.24.1-lightgray?style=for-the-badge&logo=alpine-linux&logoColor=white&labelColor=0D597F)
 ![OpenVPN](https://img.shields.io/badge/OpenVPN-2.7.5-orange?style=for-the-badge&logo=openvpn&logoColor=white)
-![OpenSSL](https://img.shields.io/badge/OpenSSL-3.5.7-blue?style=for-the-badge)
+![OpenSSL](https://img.shields.io/badge/OpenSSL-3.5.8-blue?style=for-the-badge)
 ![Easy-RSA](https://img.shields.io/badge/Easy--RSA-3.2.5-blue?style=for-the-badge&logo=lock)
 
 ## Quick Start
