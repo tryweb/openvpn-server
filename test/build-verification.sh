@@ -298,11 +298,11 @@ echo "[Step 15] Generating version report..."
 echo "----------------------------------------"
 
 ALPINE_VERSION=$(docker exec "$CONTAINER_NAME" cat /etc/alpine-release 2>/dev/null | grep -oP '\d+\.\d+\.\d+' | head -1 || echo "unknown")
-APK_LIST=$(docker exec "$CONTAINER_NAME" apk list 2>/dev/null | grep -E "^(alpine-release|easy-rsa|openssl|openvpn)-" | head -4 || echo "")
+APK_LIST=$(docker exec "$CONTAINER_NAME" apk list 2>/dev/null | grep -E "^(alpine-release|easy-rsa|openssl|openvpn)-[0-9]" | head -4 || echo "")
 
-EASYRSA_VER=$(echo "$APK_LIST" | grep "^easy-rsa-" | awk '{print $1}' | sed 's/easy-rsa-//' | sed 's/-r[0-9]*$//' || echo "unknown")
-OPENVPN_VER=$(echo "$APK_LIST" | grep "^openvpn-" | awk '{print $1}' | sed 's/openvpn-//' | sed 's/-r[0-9]*$//' || echo "unknown")
-OPENSSL_VER=$(echo "$APK_LIST" | grep "^openssl-" | awk '{print $1}' | sed 's/openssl-//' | sed 's/-r[0-9]*$//' || echo "unknown")
+EASYRSA_VER=$(echo "$APK_LIST" | grep "^easy-rsa-[0-9]" | head -1 | awk '{print $1}' | sed 's/easy-rsa-//' | sed 's/-r[0-9]*$//' || echo "unknown")
+OPENVPN_VER=$(echo "$APK_LIST" | grep "^openvpn-[0-9]" | head -1 | awk '{print $1}' | sed 's/openvpn-//' | sed 's/-r[0-9]*$//' || echo "unknown")
+OPENSSL_VER=$(echo "$APK_LIST" | grep "^openssl-[0-9]" | head -1 | awk '{print $1}' | sed 's/openssl-//' | sed 's/-r[0-9]*$//' || echo "unknown")
 
 OPENVPN_FULL=$(docker exec "$CONTAINER_NAME" openvpn --version 2>/dev/null | head -1 || echo "unknown")
 
